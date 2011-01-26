@@ -94,6 +94,7 @@ $config = array(
 	'forum_mod_database'		=> 0,
 	'forum_style_database'		=> 0,
 	'forum_converter_database'	=> 0,
+	'forum_bbcode_database'		=> 0,
 
 	/**
 	* IDs of account used for topic/post release in database forum
@@ -101,6 +102,7 @@ $config = array(
 	'forum_mod_robot'		=> 0,
 	'forum_style_robot'		=> 0,
 	'forum_converter_robot' => 0,
+	'forum_bbcode_robot'	=> 0,
 
 	/**
 	* Show the support/discussion panel in each contribution to the public?
