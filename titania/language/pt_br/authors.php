@@ -4,7 +4,7 @@
 * @package Titania
 * @version $Id$
 * @copyright (c) 2008 phpBB Customisation Database Team
-* @license http://opensource.org/licenses/gpl-license.php GNU Public License
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
 * Tradução feita e revisada pela Equipe phpBB Brasil <http://www.phpbbrasil.com.br>!
 *
 */
@@ -44,6 +44,7 @@ $lang = array_merge($lang, array(
 	'AUTHOR_NOT_FOUND'			=> 'Autor não encontrado',
 	'AUTHOR_PROFILE'			=> 'Perfil do autor',
 	'AUTHOR_RATING'				=> 'Avaliação do autor',
+	'AUTHOR_REAL_NAME'			=> 'Nome real',
 	'AUTHOR_SNIPPETS'			=> '%d fragmentos',
 	'AUTHOR_SNIPPETS_ONE'		=> '1 fragmento',
 	'AUTHOR_STATISTICS'			=> 'Estatísticas do autor',
@@ -59,8 +60,6 @@ $lang = array_merge($lang, array(
 	'NO_AVATAR'					=> 'Sem avatar',
 
 	'PHPBB_PROFILE'				=> 'Perfil no phpBBrasil',
-
-	'REAL_NAME'					=> 'Nome real',
 
 	'USER_INFORMATION'			=> 'Informações do usuário',
 

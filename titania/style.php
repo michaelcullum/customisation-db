@@ -1,13 +1,11 @@
 <?php
 /**
- *
- * @package titania
- * @version $Id$
- * @copyright (c) 2008 phpBB Customisation Database Team
- * @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
- *
- * @todo Check over this whole style.php file...
- */
+*
+* @package Titania
+* @copyright (c) 2008 phpBB Customisation Database Team
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
+*
+*/
 
 /**
 * @ignore
@@ -140,5 +138,12 @@ function get_path()
 	$script_name = str_replace(array('\\', '//'), '/', $script_name);
 	$script_path = trim(str_replace('\\', '/', dirname($script_name)));
 
-	return 'http://' . $host . str_replace(' ', '%20', htmlspecialchars($script_path));
+	$path = 'http://' . $host . str_replace(' ', '%20', htmlspecialchars($script_path));
+
+	if (substr($path, -1) == '/')
+	{
+		$path = substr($path, 0, -1);
+	}
+
+	return $path;
 }

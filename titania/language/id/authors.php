@@ -4,7 +4,7 @@
 * @package Titania
 * @version $Id$
 * @copyright (c) 2008 phpBB Customisation Database Team
-* @license http://opensource.org/licenses/gpl-license.php GNU Public License
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
 *
 */
 
@@ -43,6 +43,7 @@ $lang = array_merge($lang, array(
 	'AUTHOR_NOT_FOUND'			=> 'Pengarang tidak ditemukan',
 	'AUTHOR_PROFILE'			=> 'Profil Pengarang',
 	'AUTHOR_RATING'				=> 'Rating Pengarang',
+	'AUTHOR_REAL_NAME'			=> 'Nama Asli',
 	'AUTHOR_SNIPPETS'			=> '%d Potongan',
 	'AUTHOR_SNIPPETS_ONE'		=> '1 Potongan',
 	'AUTHOR_STATISTICS'			=> 'Statistik Pengarang',
@@ -58,8 +59,6 @@ $lang = array_merge($lang, array(
 	'NO_AVATAR'					=> 'Tidak ada avatar',
 
 	'PHPBB_PROFILE'				=> 'Profil phpBB.com',
-
-	'REAL_NAME'					=> 'Nama Asli',
 
 	'USER_INFORMATION'			=> 'informasi pengguna',
 

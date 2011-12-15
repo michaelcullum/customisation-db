@@ -1,12 +1,11 @@
 <?php
 /**
- *
- * @package titania
- * @version $Id$
- * @copyright (c) 2008 phpBB Customisation Database Team
- * @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
- *
- */
+*
+* @package Titania
+* @copyright (c) 2008 phpBB Customisation Database Team
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
+*
+*/
 
 /**
 * @ignore
@@ -136,6 +135,7 @@ $template->assign_vars(array(
 	'S_CREATE'				=> true,
 	'S_STYLE'				=> TITANIA_TYPE_STYLE,
 	'S_CAN_EDIT_STYLE_DEMO'	=> (titania::$config->can_modify_style_demo_url || titania_types::$types[TITANIA_TYPE_STYLE]->acl_get('moderate')) ? true : false,
+	'S_CAN_EDIT_CONTRIB'	=> (phpbb::$auth->acl_get('u_titania_contrib_submit')) ? true : false,
 
 	'SCREENSHOT_UPLOADER'	=> $screenshot->parse_uploader('posting/attachments/simple.html'),
 	'CONTRIB_PERMALINK'		=> utf8_normalize_nfc(request_var('permalink', '', true)),

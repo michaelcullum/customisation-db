@@ -1,12 +1,11 @@
 <?php
 /**
- *
- * @package Titania
- * @version $Id$
- * @copyright (c) 2009 phpBB Customisation Database Team
- * @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
- *
- */
+*
+* @package Titania
+* @copyright (c) 2008 phpBB Customisation Database Team
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
+*
+*/
 
 /**
  * @ignore
@@ -26,6 +25,38 @@ if (!defined('IN_TITANIA'))
  */
 class titania_sync
 {
+	/**
+	* Sync attachments
+	*/
+	public function attachments($mode, $attachment_id = false)
+	{
+		switch ($mode)
+		{
+			case 'hash' :
+				$sql = 'SELECT * FROM ' . TITANIA_ATTACHMENTS_TABLE .
+					(($attachment_id !== false) ? ' WHERE attachment_id = ' . (int) $attachment_id : '');
+				$result = phpbb::$db->sql_query($sql);
+				while ($row = phpbb::$db->sql_fetchrow($result))
+				{
+					$file = titania::$config->upload_path . utf8_basename($row['attachment_directory']) . '/' . utf8_basename($row['physical_filename']);
+					if (file_exists($file))
+					{
+						$md5 = md5_file($file);
+
+						if ($md5 != $row['hash'])
+						{
+							$sql = 'UPDATE ' . TITANIA_ATTACHMENTS_TABLE . '
+								SET hash = \'' . phpbb::$db->sql_escape($md5) . '\'
+								WHERE attachment_id = ' . $row['attachment_id'];
+							phpbb::$db->sql_query($sql);
+						}
+					}
+				}
+				phpbb::$db->sql_freeresult($result);
+			break;
+		}
+	}
+
 	/**
 	* Sync authors
 	*

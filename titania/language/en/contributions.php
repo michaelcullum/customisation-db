@@ -2,9 +2,8 @@
 /**
 *
 * @package Titania
-* @version $Id$
 * @copyright (c) 2008 phpBB Customisation Database Team
-* @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
 *
 */
 
@@ -147,7 +146,7 @@ $lang = array_merge($lang, array(
 	'NO_REVISION_ATTACHMENT'				=> 'Please select a file to upload',
 	'NO_REVISION_VERSION'					=> 'Please enter a version for the revision',
 	'NO_SCREENSHOT'							=> 'No screenshot',
-	'NO_TRANSLATION'						=> 'The archive does not appear to be a valid language package. Please ensure it contains all the files found in the English language directory',
+	'NO_TRANSLATION'						=> 'The archive does not appear to be a valid language package. Please ensure it contains only all the files found in the default British English language pack.',
 
 	'PHPBB_BRANCH'							=> 'phpBB Branch',
 	'PHPBB_BRANCH_EXPLAIN'					=> 'Select the phpBB branch that this revision supports.',

@@ -1,12 +1,11 @@
 <?php
 /**
- *
- * @package titania
- * @version $Id$
- * @copyright (c) 2008 phpBB Customisation Database Team
- * @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
- *
- */
+*
+* @package Titania
+* @copyright (c) 2008 phpBB Customisation Database Team
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
+*
+*/
 
 /**
 * @ignore
@@ -119,7 +118,7 @@ if (isset($_POST['submit']))
 	if (!sizeof($error))
 	{
 		// Update the status
-		if ($revision_status != $revision->revision_status && titania_types::$types[titania::$contrib->contrib_type]->acl_get('moderate'))
+		if ($revision_status != $revision->revision_status && titania_types::$types[titania::$contrib->contrib_type]->acl_get('moderate') && !(!titania::$config->allow_self_validation && (phpbb::$user->data['user_type'] != USER_FOUNDER) && ($revision_status == TITANIA_REVISION_APPROVED) && ($contrib->is_author || $contrib->is_active_coauthor || $contrib->is_coauthor)))
 		{
 			$revision->change_status($revision_status);
 		}

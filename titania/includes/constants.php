@@ -2,9 +2,8 @@
 /**
 *
 * @package Titania
-* @version $Id$
 * @copyright (c) 2008 phpBB Customisation Database Team
-* @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
 *
 */
 
@@ -60,6 +59,7 @@ define('TITANIA_POST', 10);
 define('TITANIA_SCREENSHOT', 11);
 define('TITANIA_ATTENTION', 12);
 define('TITANIA_TRANSLATION', 13);
+define('TITANIA_CLR_SCREENSHOT', 14); // ColorizeIt sample image
 
 // Errorbox types
 define('TITANIA_ERROR', 1);

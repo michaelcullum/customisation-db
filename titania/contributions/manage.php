@@ -1,12 +1,11 @@
 <?php
 /**
- *
- * @package titania
- * @version $Id$
- * @copyright (c) 2008 phpBB Customisation Database Team
- * @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
- *
- */
+*
+* @package Titania
+* @copyright (c) 2008 phpBB Customisation Database Team
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
+*
+*/
 
 /**
 * @ignore
@@ -101,6 +100,19 @@ if ($screenshot->uploaded || isset($_POST['preview']) || $submit)
 		'contrib_local_name' => utf8_normalize_nfc(request_var('contrib_local_name', '', true)),
 		'contrib_iso_code' => request_var('contrib_iso_code', ''),
 	));
+}
+
+// ColorizeIt sample
+if(strlen(titania::$config->colorizeit) && titania_types::$types[titania::$contrib->contrib_type]->acl_get('colorizeit'))
+{
+    $clr_sample = new titania_attachment(TITANIA_CLR_SCREENSHOT, titania::$contrib->contrib_id);
+    $clr_sample->load_attachments();
+    $clr_sample->upload();
+    $error = array_merge($error, $clr_sample->error);
+    if ($clr_sample->uploaded || isset($_POST['preview']) || $submit)
+    {
+        titania::$contrib->post_data($message);
+    }
 }
 
 if (isset($_POST['preview']))
@@ -250,6 +262,14 @@ else if ($submit)
 		// Submit screenshots
 		$screenshot->submit();
 
+		// ColorizeIt stuff
+        if(strlen(titania::$config->colorizeit) && titania_types::$types[titania::$contrib->contrib_type]->acl_get('colorizeit'))
+        {
+            $clr_sample->submit();
+            $contrib_clr_colors = utf8_normalize_nfc(request_var('change_colors', titania::$contrib->contrib_clr_colors));
+            titania::$contrib->__set('contrib_clr_colors', $contrib_clr_colors);
+        }
+
 		// Update contrib_status/permalink if we can moderate. only if contrib_status is valid and permalink altered
 		if (titania_types::$types[titania::$contrib->contrib_type]->acl_get('moderate'))
 		{
@@ -340,16 +360,35 @@ foreach ($status_list as $status => $row)
 	));
 }
 
+// ColorizeIt
+if(strlen(titania::$config->colorizeit) && titania_types::$types[titania::$contrib->contrib_type]->acl_get('colorizeit'))
+{
+    $clr_testsample = '';
+    if(titania::$contrib->has_colorizeit(true) || is_array(titania::$contrib->clr_sample))
+    {
+        $clr_testsample = 'http://' . titania::$config->colorizeit_url . '/testsample.html?sub=' . titania::$config->colorizeit . '&amp;sample=' . urlencode(titania_url::build_url('download', array('id' => titania::$contrib->clr_sample['attachment_id'])));
+    }
+    phpbb::$template->assign_vars(array(
+        'MANAGE_COLORIZEIT'         => titania::$config->colorizeit,
+        'CLR_SCREENSHOTS'           => $clr_sample->parse_uploader('posting/attachments/simple.html'),
+        'CLR_COLORS'                => htmlspecialchars(titania::$contrib->contrib_clr_colors),
+        'U_TESTSAMPLE'              => $clr_testsample,
+    ));
+}
+
 phpbb::$template->assign_vars(array(
+	'S_CONTRIB_APPROVED'		=> (titania::$contrib->contrib_status == TITANIA_CONTRIB_APPROVED) ? true : false,
 	'S_POST_ACTION'				=> titania::$contrib->get_url('manage'),
 	'S_EDIT_SUBJECT'			=> (titania_types::$types[titania::$contrib->contrib_type]->acl_get('moderate')) ? true : false,
 	'S_DELETE_CONTRIBUTION'		=> (phpbb::$auth->acl_get('u_titania_admin')) ? true : false,
 	'S_IS_OWNER'				=> (titania::$contrib->is_author) ? true : false,
 	'S_IS_MODERATOR'			=> (titania_types::$types[titania::$contrib->contrib_type]->acl_get('moderate')) ? true : false,
 	'S_CAN_EDIT_STYLE_DEMO'		=> (titania::$config->can_modify_style_demo_url || titania_types::$types[TITANIA_TYPE_STYLE]->acl_get('moderate') || titania::$contrib->contrib_type != TITANIA_TYPE_STYLE) ? true : false,
+	'S_CAN_EDIT_CONTRIB'		=> (phpbb::$auth->acl_get('u_titania_contrib_submit')) ? true : false,
 
 	'CONTRIB_PERMALINK'			=> $permalink,
-	'SCREENSHOT_UPLOADER'		=> $screenshot->parse_uploader('posting/attachments/simple.html'),
+	'CONTRIB_TYPE'			=> (int) titania::$contrib->contrib_type,
+	'SCREENSHOT_UPLOADER'		=> (phpbb::$auth->acl_get('u_titania_contrib_submit')) ? $screenshot->parse_uploader('posting/attachments/simple.html') : false,
 	'ERROR_MSG'					=> (sizeof($error)) ? implode('<br />', $error) : false,
 	'ACTIVE_COAUTHORS'			=> $active_coauthors,
 	'NONACTIVE_COAUTHORS'		=> $nonactive_coauthors,

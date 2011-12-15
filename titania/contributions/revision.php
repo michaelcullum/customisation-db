@@ -1,12 +1,11 @@
 <?php
 /**
- *
- * @package titania
- * @version $Id$
- * @copyright (c) 2008 phpBB Customisation Database Team
- * @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
- *
- */
+*
+* @package Titania
+* @copyright (c) 2008 phpBB Customisation Database Team
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
+*
+*/
 
 /**
 * @ignore
@@ -20,7 +19,11 @@ titania::_include('functions_posting', 'generate_type_select');
 
 load_contrib();
 
-if (!titania::$contrib->is_author && !titania::$contrib->is_active_coauthor && !titania_types::$types[titania::$contrib->contrib_type]->acl_get('moderate'))
+if (!phpbb::$auth->acl_get('u_titania_contrib_submit'))
+{
+	titania::needs_auth();
+}
+else if (!titania::$contrib->is_author && !titania::$contrib->is_active_coauthor && !titania_types::$types[titania::$contrib->contrib_type]->acl_get('moderate'))
 {
 	titania::needs_auth();
 }
@@ -57,8 +60,12 @@ if ($repack)
 		trigger_error('NO_QUEUE_ITEM');
 	}
 
+	titania::$contrib->get_revisions();
+	$last_rev_id = (int) max(array_keys(titania::$contrib->revisions));
+	$last_rev_status = (int) titania::$contrib->revisions[$last_rev_id]['revision_status'];
+	
 	// Check auth
-	if (!titania_types::$types[titania::$contrib->contrib_type]->acl_get('moderate') && !$old_queue->allow_author_repack)
+	if ((!titania_types::$types[titania::$contrib->contrib_type]->acl_get('moderate') && !$old_queue->allow_author_repack) || $last_rev_status == TITANIA_REVISION_DENIED)
 	{
 		titania::needs_auth();
 	}
@@ -392,6 +399,8 @@ else if ($step > 1)
 		$step_cnt++;
 	}
 }
+
+// Final step
 if ($step > sizeof(titania_types::$types[titania::$contrib->contrib_type]->upload_steps) + 1)
 {
 	// Repack if that's what we want
@@ -406,6 +415,12 @@ if ($step > sizeof(titania_types::$types[titania::$contrib->contrib_type]->uploa
 
 	// Update the queue (make visible)
 	$revision->update_queue();
+
+	// Update the attachment MD5, it may have changed
+	$sql = 'UPDATE ' . TITANIA_ATTACHMENTS_TABLE . '
+		SET hash = \'' . phpbb::$db->sql_escape($contrib_tools->md5_hash) . '\'
+		WHERE attachment_id = ' . $revision_attachment->attachment_id;
+	phpbb::$db->sql_query($sql);
 
 	if ($repack && titania::$config->use_queue && titania_types::$types[titania::$contrib->contrib_type]->use_queue)
 	{
@@ -484,7 +499,7 @@ if ($step == 0 || sizeof($error))
 		'REVISION_BBCODE_USE'		=> utf8_normalize_nfc(request_var('revision_bbcode_usage', '', true)),
 		'REVISION_HELP_LINE'		=> utf8_normalize_nfc(request_var('revision_help_line', '', true)),
 		'REVISION_CUSTOM_LICENSE'	=> utf8_normalize_nfc(request_var('revision_custom_license', '', true)),
-		'QUEUE_ALLOW_REPACK'		=> request_var('queue_allow_repack', 0),
+		'QUEUE_ALLOW_REPACK'		=> request_var('queue_allow_repack', 1),
 
 		'NEXT_STEP'					=> 1,
 

@@ -2,9 +2,8 @@
 /**
 *
 * @package Titania
-* @version $Id$
 * @copyright (c) 2008 phpBB Customisation Database Team
-* @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
 *
 */
 
@@ -73,7 +72,10 @@ class titania_type_mod extends titania_type_base
 
 		if (titania::$config->use_queue && $this->use_queue)
 		{
-			$this->upload_steps[] = array('contrib_type', 'mpv_test');
+			if ($this->mpv_test)
+			{
+				$this->upload_steps[] = array('contrib_type', 'mpv_test');
+			}
 
 			if ($this->automod_test)
 			{

@@ -2,9 +2,8 @@
 /**
 *
 * @package Titania
-* @version $Id$
 * @copyright (c) 2008 phpBB Customisation Database Team
-* @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
 *
 */
 
@@ -47,7 +46,7 @@ class titania_contribution extends titania_message_object
 	 * @var string
 	 */
 	protected $object_type = TITANIA_CONTRIB;
-
+	
 	/**
 	 * Author & co-authors of this contribution
 	 *
@@ -78,6 +77,13 @@ class titania_contribution extends titania_message_object
 	public $is_author = false;
 	public $is_active_coauthor = false;
 	public $is_coauthor = false;
+
+	/**
+	 * ColorizeIt sample row
+	 *
+	 * @var array
+     */
+    public $clr_sample = false;
 
 	/**
 	 * Constructor class for the contribution object
@@ -121,6 +127,9 @@ class titania_contribution extends titania_message_object
 			// Translation items
 			'contrib_iso_code'				=> array('default' => ''),
 			'contrib_local_name'			=> array('default' => ''),
+			
+			// ColorizeIt stuff
+			'contrib_clr_colors'            => array('default' => ''),
 		));
 
 		// Hooks
@@ -387,6 +396,7 @@ class titania_contribution extends titania_message_object
 			'CONTRIB_VIEWS'					=> $this->contrib_views,
 			'CONTRIB_UPDATE_DATE'			=> ($this->contrib_last_update) ? phpbb::$user->format_date($this->contrib_last_update) : '',
 			'CONTRIB_STATUS'				=> $this->contrib_status,
+			'CONTRIB_SCREENSHOT'			=> ($this->screenshots) ? $this->screenshots->preview_image() : false,
 
 			'CONTRIB_LOCAL_NAME'			=> $this->contrib_local_name,
 			'CONTRIB_ISO_CODE'				=> $this->contrib_iso_code,
@@ -411,7 +421,7 @@ class titania_contribution extends titania_message_object
 
 			'U_VIEW_DEMO'					=> $this->contrib_demo,
 		);
-
+		
 		// Ignore some stuff before it is submitted else we can cause an error
 		if ($this->contrib_id)
 		{
@@ -421,7 +431,7 @@ class titania_contribution extends titania_message_object
 
 				'U_CONTRIB_MANAGE'				=> ((($this->is_author || $this->is_active_coauthor) && !in_array($this->contrib_status, array(TITANIA_CONTRIB_CLEANED, TITANIA_CONTRIB_DISABLED))) || titania_types::$types[$this->contrib_type]->acl_get('moderate')) ? $this->get_url('manage') : '',
 				'U_DOWNLOAD'					=> (isset($this->download['attachment_id'])) ? titania_url::build_url('download', array('id' => $this->download['attachment_id'])): '',
-				'U_NEW_REVISION'				=> ((($this->is_author || $this->is_active_coauthor) && !in_array($this->contrib_status, array(TITANIA_CONTRIB_CLEANED, TITANIA_CONTRIB_DISABLED))) || titania_types::$types[$this->contrib_type]->acl_get('moderate')) ? $this->get_url('revision') : '',
+				'U_NEW_REVISION'				=> (phpbb::$auth->acl_get('u_titania_contrib_submit')) && ((($this->is_author || $this->is_active_coauthor) && !in_array($this->contrib_status, array(TITANIA_CONTRIB_CLEANED, TITANIA_CONTRIB_DISABLED))) || titania_types::$types[$this->contrib_type]->acl_get('moderate')) ? $this->get_url('revision') : '',
 				'U_QUEUE_DISCUSSION'			=> (titania::$config->use_queue && titania_types::$types[$this->contrib_type]->use_queue && ((($this->is_author || $this->is_active_coauthor) && !in_array($this->contrib_status, array(TITANIA_CONTRIB_CLEANED, TITANIA_CONTRIB_DISABLED))) || titania_types::$types[$this->contrib_type]->acl_get('queue_discussion'))) ? $this->get_url('queue_discussion') : '',
 				'U_VIEW_CONTRIB'				=> $this->get_url(),
 
@@ -438,6 +448,12 @@ class titania_contribution extends titania_message_object
 
 				'JS_CONTRIB_TRANSLATION'		=> !empty($this->contrib_iso_code) ? 'true' : 'false', // contrib_iso_code is a mandatory field and must be included with all translation contributions
 			));
+			
+            // ColorizeIt stuff
+            if(strlen(titania::$config->colorizeit) && $this->has_colorizeit() && isset($this->download['attachment_id']))
+            {
+                $vars['U_COLORIZEIT'] = 'http://' . titania::$config->colorizeit_url . '/custom/' . titania::$config->colorizeit . '.html?id=' . $this->download['attachment_id']  . '&amp;sample=' . $this->clr_sample['attachment_id'];
+            }
 		}
 
 		// Hooks
@@ -1038,6 +1054,9 @@ class titania_contribution extends titania_message_object
 
 		if (sizeof($active))
 		{
+			// First check that each author has a author row.
+			$this->validate_author_row($active);
+
 			$sql_ary = array();
 			foreach ($active as $user_id)
 			{
@@ -1059,6 +1078,9 @@ class titania_contribution extends titania_message_object
 
 		if (sizeof($nonactive))
 		{
+			// First check that each author has a author row.
+			$this->validate_author_row($nonactive);
+
 			$sql_ary = array();
 			foreach ($nonactive as $user_id)
 			{
@@ -1076,6 +1098,60 @@ class titania_contribution extends titania_message_object
 
 			// Increment the contrib counter
 			$this->change_author_contrib_count($nonactive);
+		}
+	}
+
+	/**
+	 * Check that each contributor has a author row.
+	 * If not create one.
+	 *
+	 * $author_arr[] = array(
+	 * 	'username' => 'user_id', // both are strings.
+	 * );
+	 *
+	 * @param array $author_arr, array with contributor data from set_coauthors()
+	 */
+	public function validate_author_row($author_arr)
+	{
+		// Always make sure that we actually got some data to work with...
+		if (empty($author_arr) || !is_array($author_arr))
+		{
+			return;
+		}
+
+		$sql = 'SELECT user_id FROM ' . TITANIA_AUTHORS_TABLE . '
+			WHERE ' . phpbb::$db->sql_in_set('user_id', $author_arr);
+		$result = phpbb::$db->sql_query($sql);
+
+		$existing = array();
+		while ($row = phpbb::$db->sql_fetchrow($result))
+		{
+			$existing[] = (int) $row['user_id'];
+		}
+		phpbb::$db->sql_freeresult($result);
+
+		if (sizeof($existing) == sizeof($author_arr))
+		{
+			// All co-authors found, we are done.
+			return;
+		}
+
+		$sql_ary = array();
+		foreach ($author_arr as $username => $user_id)
+		{
+			if (!in_array($user_id, $existing))
+			{
+				// This author needs to be created.
+				$sql_ary[] = array(
+					'user_id'		=> $user_id,
+					'author_desc' => '',
+				);
+			}
+		}
+
+		if (!empty($sql_ary))
+		{
+			phpbb::$db->sql_multi_insert(TITANIA_AUTHORS_TABLE, $sql_ary);
 		}
 	}
 
@@ -1264,6 +1340,20 @@ class titania_contribution extends titania_message_object
 				WHERE ' . phpbb::$db->sql_in_set('category_id', array_map('intval', $categories));
 			phpbb::$db->sql_query($sql);
 		}
+	}
+	
+	/**
+	* Check if ColorizeIt is available
+	*/
+	public function has_colorizeit($force_update = false)
+	{
+	    if($force_update || $this->clr_sample === false)
+	    {
+	        // get sample id from database
+            $attachment = new titania_attachment(TITANIA_CLR_SCREENSHOT, $this->contrib_id);
+            $this->clr_sample = $attachment->get_preview();
+	    }
+	    return is_array($this->clr_sample) && strlen($this->contrib_clr_colors) > 0;
 	}
 
 	/**

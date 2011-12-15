@@ -1,12 +1,11 @@
 <?php
 /**
- *
- * @package titania
- * @version $Id$
- * @copyright (c) 2008 phpBB Customisation Database Team
- * @license http://opensource.org/licenses/gpl-2.0.php GNU Public License
- *
- */
+*
+* @package Titania
+* @copyright (c) 2008 phpBB Customisation Database Team
+* @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License, version 2
+*
+*/
 
 /**
 * @ignore
@@ -157,6 +156,12 @@ if ($queue_id)
 			// Load the contribution
 			$contrib = new titania_contribution();
 			$contrib->load((int) $queue->contrib_id);
+
+			// Do not allow to approve your own contributions, except for founders...
+			if (!titania::$config->allow_self_validation && (phpbb::$user->data['user_type'] != USER_FOUNDER) && ($action == 'approve') && ($contrib->is_author || $contrib->is_active_coauthor || $contrib->is_coauthor))
+			{
+				titania::needs_auth();
+			}
 
 			if (!titania_types::$types[$contrib->contrib_type]->acl_get('validate'))
 			{
