@@ -659,11 +659,11 @@ $versions = array(
 	    ),
 	),
 	
-	'0.4.1' => array(
+	'0.4.2' => array(
 		'table_column_add' => array(
-			array(TITANIA_REVISIONS_TABLE, 'revision_bbcode_use', array('VCHAR', 255)),
-			array(TITANIA_REVISIONS_TABLE, 'revision_html_replace', array('VCHAR', 255)),
-			array(TITANIA_REVISIONS_TABLE, 'revision_help_line', array('VCHAR', 255)),
+			array(TITANIA_REVISIONS_TABLE, 'revision_bbc_bbcode_usage', array('VCHAR', 255)),
+			array(TITANIA_REVISIONS_TABLE, 'revision_bbc_ html_replace', array('VCHAR', 255)),
+			array(TITANIA_REVISIONS_TABLE, 'revision_bbc_help_line', array('VCHAR', 255)),
 		),
 	),
 	// IF YOU ADD A NEW VERSION DO NOT FORGET TO INCREMENT THE VERSION NUMBER IN common.php!
