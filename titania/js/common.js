@@ -152,6 +152,29 @@ $(document).ready(function(){
 	}, function() {
 		$(this).children('.subactions').toggle();
 	});
+	
+	$('.download-main').click(function() {
+		var cease = readCookie('cdb_ignore_subscription');
+		
+		if (!cease && $('.dialog#subscription').length) {
+			$.colorbox({html: $('.dialog#subscription').html(), width: '400px'});
+		}
+	});
+	
+	$('#cboxLoadedContent #cancel').live('click', function(event) {
+		event.preventDefault();
+		$.colorbox.close();
+	});
+	
+	$('#cboxLoadedContent #cease').live('click', function(event) {
+		event.preventDefault();
+		createCookie('cdb_ignore_subscription', 'true', 365);
+		$.colorbox.close();
+	});
+  
+	// Remove -mode_view from screenshot links as we'll be displaying the image inline, so file.php should not
+	// wrap the image in html in IE
+	$.each($('a.screenshot'), function() {this.href = this.href.replace('-mode_view', '');});
 });
 
 function hide_quotebox(box)
