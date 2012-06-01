@@ -52,6 +52,7 @@ switch ($page)
 	case 'manage' :
 	case 'revision' :
 	case 'revision_edit' :
+	case 'demo' :
 		include(TITANIA_ROOT . 'contributions/' . $page . '.' . PHP_EXT);
 	break;
 
@@ -139,12 +140,9 @@ function load_contrib($contrib_id = false)
 		),
 	);
 
-	// Display nav menu
-	$page = request_var('page', '');
-	titania::generate_nav($nav_ary, $page, 'details');
-
 	// Search for a category with the same name as the contrib type.  This is a bit ugly, but there really isn't any better option
 	$categories_ary = titania::$cache->get_categories();
+
 	foreach ($categories_ary as $category_id => $category_row)
 	{
 		$category_row['category_name'] = (isset(phpbb::$user->lang[$category_row['category_name']])) ? phpbb::$user->lang[$category_row['category_name']] : $category_row['category_name'];
@@ -158,10 +156,18 @@ function load_contrib($contrib_id = false)
 			titania::generate_breadcrumbs(array(
 				$category_object->category_name => titania_url::build_url($category_object->get_url()),
 			));
-
-			break;
 		}
 	}
+	
+	$nav_ary['demo'] = array(
+		'title'		=> 'CONTRIB_DEMO',
+		'url'		=> titania::$contrib->get_url('demo'),
+		'auth'		=> (titania::$contrib->contrib_demo && titania::$contrib->contrib_status == TITANIA_CONTRIB_APPROVED && titania::$contrib->options['demo']) ? true : false,
+	);
+	
+	// Display nav menu
+	$page = request_var('page', '');
+	titania::generate_nav($nav_ary, $page, 'details');
 
 	titania::generate_breadcrumbs(array(
 		titania::$contrib->contrib_name	=> titania::$contrib->get_url(),

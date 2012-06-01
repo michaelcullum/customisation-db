@@ -96,9 +96,10 @@ if ($screenshot->uploaded || isset($_POST['preview']) || $submit)
 {
 	titania::$contrib->post_data($message);
 	titania::$contrib->__set_array(array(
-		'contrib_demo'			=> (titania::$config->can_modify_style_demo_url || titania_types::$types[TITANIA_TYPE_STYLE]->acl_get('moderate') || titania::$contrib->contrib_type != TITANIA_TYPE_STYLE) ? $contrib_demo : titania::$contrib->contrib_demo,
-		'contrib_local_name' => utf8_normalize_nfc(request_var('contrib_local_name', '', true)),
-		'contrib_iso_code' => request_var('contrib_iso_code', ''),
+		'contrib_demo'				=> (titania::$config->can_modify_style_demo_url || titania_types::$types[TITANIA_TYPE_STYLE]->acl_get('moderate') || titania::$contrib->contrib_type != TITANIA_TYPE_STYLE) ? $contrib_demo : titania::$contrib->contrib_demo,
+		'contrib_local_name'		=> utf8_normalize_nfc(request_var('contrib_local_name', '', true)),
+		'contrib_iso_code' 			=> request_var('contrib_iso_code', ''),
+		'contrib_limited_support'	=> request_var('limited_support', false), 
 	));
 }
 
@@ -156,7 +157,7 @@ else if ($submit)
 	{
 		$error[] = phpbb::$user->lang['CANNOT_ADD_SELF_COAUTHOR'];
 	}
-	if ($contrib_demo && !preg_match('#^http[s]?://(.*?\.)*?[a-z0-9\-]+\.[a-z]{2,4}#i', $contrib_demo))
+	if ($contrib_demo && !preg_match('#^http[s]?://(.*?\.)*?[a-z0-9\-]{2,4}#i', $contrib_demo))
 	{
 		$error[] = phpbb::$user->lang['WRONG_DATA_WEBSITE'];
 	}
@@ -284,14 +285,14 @@ else if ($submit)
 			}
 		}
 
+		// Create relations
+		titania::$contrib->put_contrib_in_categories($contrib_categories);
+
 		// Submit the changes
 		titania::$contrib->submit();
 
 		// Set the coauthors
 		titania::$contrib->set_coauthors($active_coauthors_list, $nonactive_coauthors_list, true);
-
-		// Create relations
-		titania::$contrib->put_contrib_in_categories($contrib_categories);
 
 		// Update the release topic
 		titania::$contrib->update_release_topic();
@@ -385,6 +386,7 @@ phpbb::$template->assign_vars(array(
 	'S_IS_MODERATOR'			=> (titania_types::$types[titania::$contrib->contrib_type]->acl_get('moderate')) ? true : false,
 	'S_CAN_EDIT_STYLE_DEMO'		=> (titania::$config->can_modify_style_demo_url || titania_types::$types[TITANIA_TYPE_STYLE]->acl_get('moderate') || titania::$contrib->contrib_type != TITANIA_TYPE_STYLE) ? true : false,
 	'S_CAN_EDIT_CONTRIB'		=> (phpbb::$auth->acl_get('u_titania_contrib_submit')) ? true : false,
+	'S_LIMITED_SUPPORT'			=> titania::$contrib->contrib_limited_support,
 
 	'CONTRIB_PERMALINK'			=> $permalink,
 	'CONTRIB_TYPE'			=> (int) titania::$contrib->contrib_type,

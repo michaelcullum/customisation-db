@@ -633,7 +633,7 @@ $versions = array(
 	'0.3.9' => array(
 		'custom' => 'titania_custom',
 	),
-	
+
 	'0.3.10' => array(
 		'table_column_add' => array(
 			array(TITANIA_ATTACHMENTS_TABLE, 'is_preview', array('TINT:1', 0)),
@@ -658,8 +658,54 @@ $versions = array(
 			array(TITANIA_POSTS_TABLE, 'post_edit_time', array('UINT:11', 0)),
 	    ),
 	),
-	
-	'0.4.2' => array(
+	'0.3.14' => array(
+		'table_column_add' => array(
+			array(TITANIA_CATEGORIES_TABLE, 'category_options', array('TINT:4', 0)),
+		),
+	),
+	'0.3.15' => array(
+		'table_column_add' => array(
+			array(TITANIA_CONTRIBS_TABLE, 'contrib_limited_support', array('TINT:1', 0)),
+		),
+	),
+	'0.3.16' => array(
+		'table_add' => array(
+			array(TITANIA_TOPICS_POSTED_TABLE, array(
+				'COLUMNS'		=> array(
+					'user_id'			=> array('UINT', 0),
+					'topic_id'			=> array('UINT', 0),
+					'topic_posted'		=> array('TINT:1', 0)),
+				'KEYS'			=> array(
+					'user_id'			=> array('INDEX', 'user_id'),
+					'topic_id'			=> array('INDEX', 'topic_id'),
+				),
+			)),
+		),
+		'custom'	=> 'titania_custom',
+	),
+	'0.3.17' => array(
+		'table_remove'		=> TITANIA_TOPICS_POSTED_TABLE,
+		'table_add'			=> array(
+			array(TITANIA_TOPICS_POSTED_TABLE, array(
+				'COLUMNS'		=> array(
+					'user_id'			=> array('UINT', 0),
+					'topic_id'			=> array('UINT', 0),
+					'topic_posted'		=> array('TINT:1', 0)),
+				'PRIMARY_KEY'			=> 'user_id, topic_id',
+				),
+			)),
+		'custom'		=> 'titania_custom',
+	),
+	'0.4.0' => array(
+		'custom'	=> 'titania_custom',
+	),
+	'0.4.1' => array(
+		'table_column_add' => array(
+			array(TITANIA_CONTRIBS_TABLE, 'contrib_categories', array('VCHAR:255', '')),
+		),
+		'custom'	=> 'titania_custom',
+	),
+	'0.5.0' => array(
 		'table_column_add' => array(
 			array(TITANIA_REVISIONS_TABLE, 'revision_bbc_bbcode_usage', array('VCHAR', 255)),
 			array(TITANIA_REVISIONS_TABLE, 'revision_bbc_ html_replace', array('VCHAR', 255)),

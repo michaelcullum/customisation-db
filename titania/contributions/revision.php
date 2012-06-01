@@ -193,6 +193,9 @@ if ($step == 1)
 		));
 		$revision->phpbb_versions = $selected_branches;
 
+		// Adjust package name to follow naming conventions
+		titania_types::$types[titania::$contrib->contrib_type]->fix_package_name(titania::$contrib, $revision, $revision_attachment);
+
 		/*$revision->phpbb_versions = array();
 		foreach ($revision_phpbb_versions as $revision_phpbb_version)
 		{
@@ -234,6 +237,14 @@ if ($step == 1)
 
 			$queue->queue_allow_repack = $queue_allow_repack;
 			$queue->submit();
+			
+			$subscribe_author = request_var('subscribe_author', false);
+
+			// Subscribe author to queue discussion topic
+			if ($subscribe_author && !$repack)
+			{
+				titania_subscriptions::subscribe(TITANIA_TOPIC, $queue->queue_discussion_topic_id);
+			}
 		}
 
 		if (!titania_types::$types[titania::$contrib->contrib_type]->clean_and_restore_root)
@@ -490,6 +501,23 @@ if ($step == 0 || sizeof($error))
 		}
 	}
 
+	$allow_subscription = $author_subscribed = false;
+
+	if (titania::$config->use_queue && titania_types::$types[titania::$contrib->contrib_type]->use_queue && !$repack)
+	{
+		$allow_subscription = true;
+		$queue->contrib_id = titania::$contrib->contrib_id;
+		
+		// Get queue discussion topic id if it exists
+		$queue->get_queue_discussion_topic(true);
+	}
+
+	if (isset($queue->queue_discussion_topic_id))
+	{
+		// Is the author subscribed already?
+		$author_subscribed = titania_subscriptions::is_subscribed(TITANIA_TOPIC, $queue->queue_discussion_topic_id);
+	}
+
 	$revision_attachment = new titania_attachment(TITANIA_CONTRIB, titania::$contrib->contrib_id);
 	phpbb::$template->assign_vars(array(
 		'REVISION_NAME'				=> utf8_normalize_nfc(request_var('revision_name', '', true)),
@@ -499,12 +527,14 @@ if ($step == 0 || sizeof($error))
 		'REVISION_BBCODE_USE'		=> utf8_normalize_nfc(request_var('revision_bbcode_usage', '', true)),
 		'REVISION_HELP_LINE'		=> utf8_normalize_nfc(request_var('revision_help_line', '', true)),
 		'REVISION_CUSTOM_LICENSE'	=> utf8_normalize_nfc(request_var('revision_custom_license', '', true)),
-		'QUEUE_ALLOW_REPACK'		=> request_var('queue_allow_repack', 1),
+		'QUEUE_ALLOW_REPACK'		=> request_var('queue_allow_repack', false),
 
 		'NEXT_STEP'					=> 1,
 
+		'S_CAN_SUBSCRIBE'					=> ($author_subscribed || !$allow_subscription) ? false : true,
 		'S_CUSTOM_LICENSE'					=> (utf8_normalize_nfc(request_var('revision_license', '', true)) == phpbb::$user->lang['CUSTOM_LICENSE']) ? true : false,
 		'S_ALLOW_CUSTOM_LICENSE'			=> (titania_types::$types[titania::$contrib->contrib_type]->license_allow_custom) ? true : false,
+		'SUBSCRIBE_AUTHOR'					=> request_var('subscribe_author', false),
 	));
 
 	// Assign separately so we can output some data first

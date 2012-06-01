@@ -52,6 +52,7 @@ $lang = array_merge($lang, array(
 
 	'CACHE_PURGED'				=> 'Cache has been successfully purged',
 	'CATEGORY'					=> 'Category',
+	'CATEGORIES'				=> 'Categories',
 	'CATEGORY_CHILD_AS_PARENT'	=> 'The chosen parent category cannot be selected because it is a child of this category.',
 	'CATEGORY_DELETED'			=> 'Category Deleted',
 	'CATEGORY_DESC'				=> 'Category Description',
@@ -59,6 +60,7 @@ $lang = array_merge($lang, array(
 	'CATEGORY_HAS_CHILDREN'		=> 'This category cannot be deleted because it contains children categories.',
 	'CATEGORY_INFORMATION'		=> 'Category Information',
 	'CATEGORY_NAME'				=> 'Category Name',
+	'CATEGORY_OPTIONS'			=> 'Category Options',
 	'CATEGORY_TYPE'				=> 'Category Type',
 	'CATEGORY_TYPE_EXPLAIN'		=> 'The type of contributions this category will hold. Leave unset to not accept contributions.',
 	'CAT_ADDONS'				=> 'Add-ons',

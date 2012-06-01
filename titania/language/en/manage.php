@@ -51,6 +51,8 @@ $lang = array_merge($lang, array(
 	'DENY'						=> 'Deny',
 	'DENY_QUEUE'				=> 'Deny',
 	'DENY_QUEUE_CONFIRM'		=> 'Are you sure you want to <strong>deny</strong> this item?',
+	'DISAPPROVE_ITEM'			=> 'Disapprove',
+	'DISAPPROVE_ITEM_CONFIRM'	=> 'Are you sure you want to <strong>disapprove</strong> this item?',
 	'DISCUSSION_REPLY_MESSAGE'	=> 'Queue discussion reply message',
 
 	'EDIT_VALIDATION_NOTES'		=> 'Edit Validation Notes',
@@ -100,6 +102,7 @@ $lang = array_merge($lang, array(
 	'REVISION_REPACKED'			=> 'This revision has been repacked.',
 
 	'SUBMIT_TIME'				=> 'Submission Time',
+	'SUPPORT_ALL_VERSIONS'		=> 'Support all phpBB versions.',
 
 	'UNAPPROVED'				=> 'Unapproved',
 	'UNKNOWN'					=> 'Unknown',

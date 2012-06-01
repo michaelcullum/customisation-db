@@ -49,7 +49,7 @@ if ($attention_id || ($object_type && $object_id))
 	}
 
 	// Close, approve, or disapprove the items
-	if ($close || $approve || $disapprove || $delete)
+	if ($close || $approve || $delete)
 	{
 		if (!check_form_key('attention'))
 		{
@@ -129,48 +129,65 @@ if ($attention_id || ($object_type && $object_id))
 			// Disapprove the post
 			if ($disapprove)
 			{
-				// Load z topic
-				$post->topic->topic_id = $post->topic_id;
-				$post->topic->load();
-
-				// Notify poster about disapproval
-				if ($post->post_user_id != ANONYMOUS)
+				if (titania::confirm_box(true))
 				{
-					phpbb::_include('functions_messenger', false, 'messenger');
+					// Load z topic
+					$post->topic->topic_id = $post->topic_id;
+					$post->topic->load();
 
-					$lang_path = phpbb::$user->lang_path;
-					phpbb::$user->set_custom_lang_path(titania::$config->language_path);
+					// Notify poster about disapproval
+					if ($post->post_user_id != ANONYMOUS)
+					{
+						phpbb::_include('functions_messenger', false, 'messenger');
 
-					$messenger = new messenger(false);
+						$lang_path = phpbb::$user->lang_path;
+						phpbb::$user->set_custom_lang_path(titania::$config->language_path);
 
-					users_overlord::load_users(array($post->post_user_id));
+						$messenger = new messenger(false);
 
-					$email_template = ($post->post_id == $post->topic->topic_first_post_id && $post->post_id == $post->topic->topic_last_post_id) ? 'topic_disapproved' : 'post_disapproved';
+						users_overlord::load_users(array($post->post_user_id));
 
-					$messenger->template($email_template, users_overlord::get_user($post->post_user_id, 'user_lang'));
+						$email_template = ($post->post_id == $post->topic->topic_first_post_id && $post->post_id == $post->topic->topic_last_post_id) ? 'topic_disapproved' : 'post_disapproved';
 
-					$messenger->to(users_overlord::get_user($post->post_user_id, 'user_email'), users_overlord::get_user($post->post_user_id, '_username'));
+						$messenger->template($email_template, users_overlord::get_user($post->post_user_id, 'user_lang'));
 
-					$messenger->assign_vars(array(
-						'USERNAME'		=> htmlspecialchars_decode(users_overlord::get_user($post->post_user_id, '_username')),
-						'POST_SUBJECT'	=> htmlspecialchars_decode(censor_text($post->post_subject)),
-						'TOPIC_TITLE'	=> htmlspecialchars_decode(censor_text($post->topic->topic_subject)))
-					);
+						$messenger->to(users_overlord::get_user($post->post_user_id, 'user_email'), users_overlord::get_user($post->post_user_id, '_username'));
 
-					$messenger->send();
+						$messenger->assign_vars(array(
+							'USERNAME'		=> htmlspecialchars_decode(users_overlord::get_user($post->post_user_id, '_username')),
+							'POST_SUBJECT'	=> htmlspecialchars_decode(censor_text($post->post_subject)),
+							'TOPIC_TITLE'	=> htmlspecialchars_decode(censor_text($post->topic->topic_subject)))
+						);
 
-					phpbb::$user->set_custom_lang_path($lang_path);
+						$messenger->send();
+
+						phpbb::$user->set_custom_lang_path($lang_path);
+					}
+
+					// Delete the post
+					$post->delete();
+					
+					// Close attention item
+					$attention_object->close();
+
+					redirect(titania_url::build_url(titania_url::$current_page));
 				}
-
-				// Delete the post
-				$post->delete();
-
-				redirect(titania_url::build_url(titania_url::$current_page));
+				else
+				{
+					titania::confirm_box(false, 'DISAPPROVE_ITEM', '', array('disapprove' => true));
+				}
 			}
 
 			// Approve the post
 			if ($approve)
 			{
+				// Check how many posts are approved to determine if we are approving a topic.
+				$sql = 'SELECT COUNT(post_id) AS cnt FROM ' . TITANIA_POSTS_TABLE . '
+					WHERE topic_id = ' . $post->topic_id . '
+						AND post_approved = 1';
+				phpbb::$db->sql_query($sql);
+				$approved_posts = phpbb::$db->sql_fetchfield('cnt');
+
 				$post->post_approved = 1;
 
 				// Increment the user's postcount if we must
@@ -185,6 +202,9 @@ if ($attention_id || ($object_type && $object_id))
 				$post->topic->topic_id = $post->topic_id;
 				$post->topic->load();
 
+				// Update topics posted table
+				$post->topic->update_posted_status('add', $post->post_user_id);
+
 				// Update first/last post?
 				if ($post->topic->topic_first_post_time > $post->post_time)
 				{
@@ -195,25 +215,26 @@ if ($attention_id || ($object_type && $object_id))
 					$post->topic->sync_last_post();
 				}
 
+				$post->topic->submit();
+
+				$contrib = new titania_contribution();
+				$contrib->load($post->topic->parent_id);
+
 				// Subscriptions?
-				if ($post->topic->topic_last_post_id == $post->post_id)
+				if ($approved_posts && $post->topic->topic_last_post_id == $post->post_id)
 				{
 					phpbb::_include('functions_messenger', false, 'messenger');
 
 					$email_vars = array(
-						'NAME'		=> $post->topic->topic_subject,
-						'U_VIEW'	=> titania_url::append_url($post->topic->get_url(), array('view' => 'unread', '#' => 'unread')),
+						'NAME'			=> $post->topic->topic_subject,
+						'CONTRIB_NAME'	=> $contrib->contrib_name,
+						'U_VIEW'		=> titania_url::append_url($post->topic->get_url(), array('view' => 'unread', '#' => 'unread')),
 					);
-					titania_subscriptions::send_notifications(TITANIA_TOPIC, $post->topic_id, 'subscribe_notify.txt', $email_vars, $post->post_user_id);
+					titania_subscriptions::send_notifications(array(TITANIA_TOPIC, TITANIA_SUPPORT), array($post->topic_id, $post->topic->parent_id), 'subscribe_notify_contrib.txt', $email_vars, $post->post_user_id);
 				}
 
-				$sql = 'SELECT COUNT(post_id) AS cnt FROM ' . TITANIA_POSTS_TABLE . '
-					WHERE topic_id = ' . $post->topic_id . '
-						AND post_approved = 0';
-				phpbb::$db->sql_query($sql);
-				$cnt = phpbb::$db->sql_fetchfield('cnt');
-
-				if (!$cnt)
+				// We're approving a topic
+				if (!$approved_posts)
 				{
 					$sql = 'UPDATE ' . TITANIA_TOPICS_TABLE . '
 						SET topic_approved = 1
@@ -224,10 +245,11 @@ if ($attention_id || ($object_type && $object_id))
 					if ($post->topic->topic_last_post_id == $post->post_id)
 					{
 						$email_vars = array(
-							'NAME'		=> $post->topic->topic_subject,
-							'U_VIEW'	=> $post->topic->get_url(),
+							'NAME'			=> $post->topic->topic_subject,
+							'CONTRIB_NAME'	=> $contrib->contrib_name,
+							'U_VIEW'		=> $post->topic->get_url(),
 						);
-						titania_subscriptions::send_notifications($post->post_type, $post->topic->parent_id, 'subscribe_notify_forum.txt', $email_vars, $post->post_user_id);
+						titania_subscriptions::send_notifications($post->post_type, $post->topic->parent_id, 'subscribe_notify_forum_contrib.txt', $email_vars, $post->post_user_id);
 					}
 				}
 

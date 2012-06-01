@@ -21,6 +21,10 @@ if (!defined('IN_PHPBB'))
 	define('IN_PHPBB', true);
 }
 
+// Category option flags
+define('TITANIA_CAT_FLAG_DEMO', 1); // Integrated styles demo
+define('TITANIA_CAT_FLAG_ALL_VERSIONS', 2); // Contributions support all phpBB versions
+
 // Contrib status
 define('TITANIA_CONTRIB_NEW', 1); // Does not have any validated revisions; Hidden from category listing, shown if directly linked to
 define('TITANIA_CONTRIB_APPROVED', 2); // Has at least one validated revision
@@ -60,6 +64,7 @@ define('TITANIA_SCREENSHOT', 11);
 define('TITANIA_ATTENTION', 12);
 define('TITANIA_TRANSLATION', 13);
 define('TITANIA_CLR_SCREENSHOT', 14); // ColorizeIt sample image
+define('TITANIA_ALL_SUPPORT', 15);
 
 // Errorbox types
 define('TITANIA_ERROR', 1);

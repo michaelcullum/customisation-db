@@ -61,6 +61,7 @@ $lang = array_merge($lang, array(
 	'CONTRIB_CLEANED'						=> 'Cleaned',
 	'CONTRIB_CONFIRM_OWNER_CHANGE'			=> 'Are you sure you want to assign ownership to %s? This will prevent you from managing the project and can not be undone.',
 	'CONTRIB_CREATED'						=> 'The contribution has been created successfully',
+	'CONTRIB_DEMO'							=> 'Demo',
 	'CONTRIB_DESCRIPTION'					=> 'Contribution Description',
 	'CONTRIB_DETAILS'						=> 'Contribution Details',
 	'CONTRIB_DISABLED'						=> 'Hidden + Disabled',
@@ -126,6 +127,9 @@ $lang = array_merge($lang, array(
 	'LICENSE'								=> 'License',
 	'LICENSE_EXPLAIN'						=> 'License to release this work under.',
 	'LICENSE_FILE_MISSING'					=> 'The package must contain a license.txt file containing the license terms either in the main directory or within one subdirectory level of the main directory.',
+	'LIMITED_SUPPORT'						=> 'No support provided',
+	'LIMITED_SUPPORT_EXPLAIN'				=> 'Display warning to users about no support being provided by author.',
+	'LIMITED_SUPPORT_WARN'					=> '<strong>Warning:</strong> The author of this contribution does not provide support for it anymore.',
 	'LOGIN_EXPLAIN_CONTRIB'					=> 'In order to create a new contribution you need to be registered',
 
 	'MANAGE_CONTRIBUTION'					=> 'Manage Contribution',
@@ -190,6 +194,7 @@ $lang = array_merge($lang, array(
 	'SELECT_PHPBB_BRANCH'					=> 'Select phpBB branch',
 	'SUBDIRECTORY_LIMIT'					=> 'Packages are not allowed to be more than 50 subdirectories deep at any point.',
 	'SUBMIT_NEW_REVISION'					=> 'Submit and add new revision',
+	'SUBSCRIBE_QUEUE_DISCUSSION'			=> 'Subscribe to queue discussion topic',
 	'SUBSCRIPTION_REQUEST'					=> 'Would you like to subscribe to the contribution in order to receive e-mail notifications about new versions and security vulnerabilities?',
 
 	'TOO_MANY_TRANSLATOR_LINKS'				=> 'You are currently using %d external links within the TRANSLATION/TRANSLATION_INFO line. Please only include <strong>one link</strong>. Including two links is allowed on a case-by-case basis - please post within the translations forum noting your reasoning behind putting more external links within the line.',
